@@ -110,7 +110,7 @@ if __name__ == "__main__":
                                    'bigDataUrl '+filename+'.bw',
                                    'shortLabel '+filename,
                                    'longLabel '+filename,
-                                   'type bigwig'])+'\n\n')
+                                   'type bigWig'])+'\n\n')
         elif filetype == 'bed':
             cmds = write_bigbed(filepath,filename,genome_build,opts)
             
@@ -139,4 +139,12 @@ if __name__ == "__main__":
         with open(UCSC_PATH+opts.trackname+'/'+filename+'.sh','w') as f:
             f.write('\n'.join(cmds))
 
-        subprocess.run(['qsub  -v PATH=$PATH -wd $PWD -N run_'+filename+' '+UCSC_PATH+opts.trackname+'/'+filename+'.sh'],shell=True)
+        #subprocess.run(['qsub  -v PATH=$PATH -wd $PWD -N run_'+filename+' '+UCSC_PATH+opts.trackname+'/'+filename+'.sh'],shell=True)
+        
+with open(UCSC_PATH+opts.trackname+'/genomes.txt','w') as f:
+    for genome in genomes:
+        f.write('\n'.join(['genome '+genome,
+                           'trackDb '+genome+'/trackDb.txt']
+                          )+'\n')
+                           
+                
