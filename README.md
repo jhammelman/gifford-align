@@ -4,8 +4,8 @@
 -----------------------------------------------------------------------------------------------------------------------------
 
 python make-trackhub.py examples/trackhub-template.txt trackFolder
+
 usage: make-trackhub.py [-h] [-norm] [-bs BINSIZE] experiment_template trackname
-make-trackhub.py: error: the following arguments are required: experiment_template, trackname
 
 trackFolder can be an existing or new folder in 00_UCSC_tracks
 
@@ -20,14 +20,15 @@ This works for bed, bedpe, and bam.
 -----------------------------------------------------------------------------------------------------------------------------
 
 python align.py examples/rna-seq-template.txt START -rsem -rmdup -trim_adaptors
+
 usage: align.py [-h] [-t NTHREADS] [-trim_adaptors] [-rmdup] [-quality QUALITY] [-rsem]
                 [-cufflinks]
                 experiment_template {STAR,bwa,bowtie2}
-align.py: error: the following arguments are required: experiment_template, aligner
 
 -----------------------------------------------------------------------------------------------------------------------------
 ## Peak calling
 -----------------------------------------------------------------------------------------------------------------------------
 python call_accessible_regions.py examples/peaks-template.txt
+
 usage: call_accessible_regions.py [-h] [-t NTHREADS] [-p PVAL] [-mapq MAPQ] experiment_template
 call_accessible_regions.py: error: the following arguments are required: experiment_template
