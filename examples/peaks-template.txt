@@ -1,0 +1,7 @@
+experiment,bamfile,samplename,genome_build,assay,pe/se
+PPG_P21_18-11-29-dup,/archive/gl/shortreads/reads/181129_jhammelm.PPG_ATAC_MN_P4P21P56e12.5/PPG_P21_ATAC_Chat-INTACT_11-29-18-rep1_bwa_mm10-fixed-pe-sorted,PPG_P21-rep1,mm10,atac,pe
+PPG_P21_18-11-29-dup,/archive/gl/shortreads/reads/181129_jhammelm.PPG_ATAC_MN_P4P21P56e12.5/PPG_P21_ATAC_Chat-INTACT_11-29-18-rep2_bwa_mm10-fixed-pe-sorted,PPG_P21-rep2,mm10,atac,pe
+PPG_P4_18-11-29-dup,/archive/gl/shortreads/reads/181129_jhammelm.PPG_ATAC_MN_P4P21P56e12.5/PPG_P4_ATAC_Chat-INTACT_11-29-18-rep1_bwa_mm10-fixed-pe-sorted,PPG_P4-rep1,mm10,atac,pe
+PPG_P4_18-11-29-dup,/archive/gl/shortreads/reads/181129_jhammelm.PPG_ATAC_MN_P4P21P56e12.5/PPG_P4_ATAC_Chat-INTACT_11-29-18-rep2_bwa_mm10-fixed-pe-sorted,PPG_P4-rep2,mm10,atac,pe
+PPG_P56_18-11-29-dup,/archive/gl/shortreads/reads/181129_jhammelm.PPG_ATAC_MN_P4P21P56e12.5/PPG_P56_ATAC_Chat-INTACT_11-29-18-rep1_bwa_mm10-fixed-pe-sorted,PPG_P56-rep1,mm10,atac,pe
+PPG_P56_18-11-29-dup,/archive/gl/shortreads/reads/181129_jhammelm.PPG_ATAC_MN_P4P21P56e12.5/PPG_P56_ATAC_Chat-INTACT_11-29-18-rep2_bwa_mm10-fixed-pe-sorted,PPG_P56-rep2,mm10,atac,pe

@@ -1,0 +1,10 @@
+samplename,genome_build,description,strand
+e13.5-BL-r1,mm10,PPG_e13.5-BL+-rep1_200115-nospike,reverse
+e13.5-BL-r2,mm10,PPG_e13.5-BL+-rep2_200115-nospike,reverse
+nfiabx-KO-P21-r1,mm10,PPG_P21-NFIABX-KO-rep1_200115-nospike,reverse
+nfiabx-KO-P21-r2,mm10,PPG_P21-NFIABX-KO-rep2_200115-nospike,reverse
+nfiabx-wt-P21-r1,mm10,PPG_P21-NFIABX-WT-rep1_200115-nospike,reverse
+nfiabx-wt-P21-r2,mm10,PPG_P21-NFIABX-WT-rep2_200115-nospike,reverse
+p120-BL-r1,mm10,PPG_P120-BL+-rep1_200115-nospike,reverse
+p13-BL-r1,mm10,PPG_P13-BL+-rep1_200115-nospike,reverse
+p13-BL-r2,mm10,PPG_P13-BL+-rep2_200115-nospike,reverse

@@ -1,0 +1,5 @@
+samplepath,samplename,sampletype,genome_build
+/cluster/jhammelm/projects/NIL_UCSC_ChIP_bams/00_bams/Day4_iNIL_H3K4me3_131001-rmdup.bam,PPG_Day4_iNIL_H3K4me3_131001,bam,mm10
+/cluster/jhammelm/projects/NIL_UCSC_ChIP_bams/00_bams/PPG_Day4_iNIL_Isl1_160720-rmdup.bam,PPG_Day4_iNIL_Isl1_160720,bam,mm10
+/archive/gl/shared/projects/mn_enhancers/results/0_MACS_calls/D6_H3K27ac_peaks.bed,PPG_D6_H3K27ac,bed,mm10
+/archive/gl/shared/projects/wichterleMN/www/00_UCSC_tracks/NIL.CID-0227-1Mb-pet3.MedK27ac-ATAC.RNA-fpkm1.win1000.e2p.swapped.bedpe,PPG_NIL-CID-MedK27ac-ATAC,bedpe,mm10

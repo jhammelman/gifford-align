@@ -1,0 +1,3 @@
+samplepath,samplename,sampletype,genome_build
+/archive/gl/shared/projects/mn_enhancers/results/0_MACS_calls/D6_H3K27ac_peaks.bed,PPG_D6_H3K27ac,bed,mm10
+/archive/gl/shared/projects/wichterleMN/www/00_UCSC_tracks/NIL.CID-0227-1Mb-pet3.MedK27ac-ATAC.RNA-fpkm1.win1000.e2p.swapped.bedpe,PPG_NIL-CID-MedK27ac-ATAC,bedpe,mm10
