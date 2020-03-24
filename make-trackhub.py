@@ -30,7 +30,7 @@ def write_bigwig(filepath,filename,genome_build,opts):
                      '--binSize',str(opts.binSize),
                      '--outFileFormat bigwig']))
     if opts.normBam:
-        cmd[-1] += '--normalizeUsing CPM'
+        cmd[-1] += ' --normalizeUsing CPM'
         
     return cmd
     
