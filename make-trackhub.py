@@ -24,7 +24,20 @@ def ensure_dir(file_path):
 def write_bigwig(filepath,filename,genome_build,opts):
     cmd = []
     cmd.append(SAMTOOLS+' index '+filepath)
-    cmd.append(' '.join([BAM2BW +' --ignoreDuplicates --centerReads',
+    cmd.append(' '.join([BAM2BW +' --ignoreDuplicates --centerReads --extendReads',
+                     '--bam',filepath,
+                     '--outFileName',UCSC_PATH+opts.trackname+'/'+genome_build+'/'+filename+'.bw',
+                     '--binSize',str(opts.binSize),
+                     '--outFileFormat bigwig']))
+    if opts.normBam:
+        cmd[-1] += ' --normalizeUsing CPM'
+        
+    return cmd
+    
+def write_rna_bigwig(filepath,filename,genome_build,opts):
+    cmd = []
+    cmd.append(SAMTOOLS+' index '+filepath)
+    cmd.append(' '.join([BAM2BW +' --ignoreDuplicates',
                      '--bam',filepath,
                      '--outFileName',UCSC_PATH+opts.trackname+'/'+genome_build+'/'+filename+'.bw',
                      '--binSize',str(opts.binSize),
@@ -111,6 +124,17 @@ if __name__ == "__main__":
                                    'shortLabel '+filename,
                                    'longLabel '+filename,
                                    'type bigWig'])+'\n\n')
+        
+        if filetype == 'rna-bam':
+            cmds = write_rna_bigwig(filepath,filename,genome_build,opts)
+            with open(UCSC_PATH+opts.trackname+'/'+genome_build+'/trackDb.txt','a') as f:
+                f.write('\n'.join(['track '+filename,
+                                   'windowingFunction maximum',
+                                   'bigDataUrl '+filename+'.bw',
+                                   'shortLabel '+filename,
+                                   'longLabel '+filename,
+                                   'type bigWig'])+'\n\n')
+                
         elif filetype == 'bed':
             cmds = write_bigbed(filepath,filename,genome_build,opts)
             
@@ -139,7 +163,7 @@ if __name__ == "__main__":
         with open(UCSC_PATH+opts.trackname+'/'+filename+'.sh','w') as f:
             f.write('\n'.join(cmds))
 
-        #subprocess.run(['qsub  -v PATH=$PATH -wd $PWD -N run_'+filename+' '+UCSC_PATH+opts.trackname+'/'+filename+'.sh'],shell=True)
+        subprocess.run(['qsub  -v PATH=$PATH -wd $PWD -N run_'+filename+' '+UCSC_PATH+opts.trackname+'/'+filename+'.sh'],shell=True)
         
 with open(UCSC_PATH+opts.trackname+'/genomes.txt','w') as f:
     for genome in genomes:
