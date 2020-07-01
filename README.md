@@ -31,4 +31,4 @@ usage: align.py [-h] [-t NTHREADS] [-trim_adaptors] [-rmdup] [-quality QUALITY] 
 python call_accessible_regions.py examples/peaks-template.txt
 
 usage: call_accessible_regions.py [-h] [-t NTHREADS] [-p PVAL] [-mapq MAPQ] experiment_template
-call_accessible_regions.py: error: the following arguments are required: experiment_template
+

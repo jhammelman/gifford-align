@@ -43,6 +43,7 @@ parser.add_argument('-quality','--quality',type=int,
 parser.add_argument('-rsem','--rsem',
                     action='store_true',default=False)
 parser.add_argument('-cufflinks','--cufflinks',action='store_true',default=False)
+parser.add_argument('-local','--local',action='store_true',default=False)
 opts=parser.parse_args()
 
 hasheader=True
@@ -60,7 +61,6 @@ genomepaths = {"mm10":{"STAR":"/data/cgs/jhammelm/genomes/mm10/ref/",
                        "bwa":"/data/cgs/jhammelm/genomes/mm10/ref/mm10.fa"},
                "hg38":{"bwa":"/cluster/genomes/GRCh37/Homo_sapiens/Ensembl/GRCh37/Sequence/BWAIndex/genome",
                        "bowtie2":"/cluster/genomes/GRCh37/Homo_sapiens/Ensembl/GRCh37/Sequence/Bowtie2Index/genome"}}
-#rsemref = {"mm10":"/data/cgs/jhammelm/genomes/mm10/ref/mm10-STAR"}
 rsemref = {"mm10":"/archive/gl/shared/projects/wichterleMN/shared_data/genomes/gencode-vm24-mm10/ref/mm10-STAR","mm10-ERCC":"/archive/gl/shared/projects/wichterleMN/shared_data/genomes/gencode-vm24-mm10-ERCC/ref/mm10-STAR-ERCC"}
 cufflinksref = {"mm10":"/archive/gl/shared/projects/wichterleMN/shared_data/mm10_ncbi_refseq-2.gtf"}
 for line in open(opts.experiment_template):
@@ -88,7 +88,7 @@ for line in open(opts.experiment_template):
         path = '.'
         name = fastqpath
         
-    fqfiles = [f for f in os.listdir(path) if name in f and is_fq(f)]
+    fqfiles = sorted([f for f in os.listdir(path) if name in f and is_fq(f)])
     print(fqfiles)
     assert(len(fqfiles) <= 2)
     
@@ -148,8 +148,15 @@ for line in open(opts.experiment_template):
             f.write(' '.join(alignment)+'\n')
             f.write('samtools index '+exptfolder+'/'+description+'.bam\n')
             f.write('samtools flagstat '+exptfolder+'/'+description+'.bam > '+exptfolder+'/'+description+'.bamstats\n')
-            f.write('samtools rmdup '+exptfolder+'/'+description+'.bam '+exptfolder+'/'+description+'-rmdup.bam\n')
+            f.write('samtools sort -n  '+exptfolder+'/'+description+'.bam  > '+exptfolder+'/'+description+'-namesort.bam\n')
+            f.write('samtools fixmate -m -O bam '+exptfolder+'/'+description+'-namesort.bam '+exptfolder+'/'+description+'-fixmate.bam\n')
+            f.write('samtools sort  '+exptfolder+'/'+description+'-fixmate.bam  > '+exptfolder+'/'+description+'-sorted.bam\n')
+            f.write('samtools markdup -r '+exptfolder+'/'+description+'-sorted.bam '+exptfolder+'/'+description+'-rmdup.bam\n')
             f.write('samtools sort '+exptfolder+'/'+description+'-rmdup.bam > '+exptfolder+'/'+description+'-final.bam\n')
+            f.write('rm '+exptfolder+'/'+description+'-rmdup.bam\n')
+            f.write('rm '+exptfolder+'/'+description+'-namesort.bam\n')
+            f.write('rm '+exptfolder+'/'+description+'-sorted.bam\n')
+            f.write('rm '+exptfolder+'/'+description+'-fixmate.bam\n')
         else:
             rsem = [rsempath]
             if len(fqfiles) > 1:
@@ -190,4 +197,8 @@ for line in open(opts.experiment_template):
         f.write('mv '+fastqpath+'*trimming_report.txt '+exptfolder+'/trimgalore\n')
         f.write('rm '+fastqpath+'*_val*\n')
 
-    subprocess.run(["qsub -m e -M jhammelm@mit.edu -pe slots.pe "+str(opts.nthreads)+" -v PATH=$PATH -wd $PWD -N align_"+description+'_'+opts.aligner+' ./'+exptfolder+'/run_align.sh'],shell=True)
+    if opts.local:
+        subprocess.run(['./'+exptfolder+'/run_align.sh'],shell=True)
+    else:
+        subprocess.run(["qsub -m e -M jhammelm@mit.edu -pe slots.pe "+str(opts.nthreads)+" -v PATH=$PATH -wd $PWD -N align_"+description+'_'+opts.aligner+' ./'+exptfolder+'/run_align.sh'],shell=True)
+    
