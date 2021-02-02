@@ -18,57 +18,52 @@ def ensure_dir(file_path):
 def process_bam(bam_info,args):
     cmds = []
     bam = bam_info['bamfile']+'.bam'
-    bam_qname = bam_info['experiment']+'/bams/'+bam_info['samplename']+'-qnamesort.bam'
+    bam_qname  = bam_info['experiment']+'/bams/'+bam_info['samplename']+'-qnamesort.bam'
     bam_filt = bam_info['experiment']+'/bams/'+bam_info['samplename']+'-filt1.bam'
     bam_fixmate = bam_info['experiment']+'/bams/'+bam_info['samplename']+'-fixmate.bam'
     final_bam=bam_info['experiment']+'/bams/'+bam_info['samplename']+'-filtered.bam'
+    bam_plusstrand = bam_info['experiment']+'/bams/'+bam_info['samplename']+'-plus.bam'
+    bam_minusstrand = bam_info['experiment']+'/bams/'+bam_info['samplename']+'-minus.bam'
+    bamstats = bam_info['experiment']+'/stats/'+bam_info['samplename']+'.stats'
     #Filt Bam (mito, unmapped, mapq)
     if bam_info['readtype'] == 'se':
         cmds.append(["samtools sort -n","-@",str(args.nthreads),bam,"-o ",bam_qname])
-        cmds.append(["samtools view  -F 1804 -u ","-@",str(args.nthreads),"-q",str(args.mapq),bam_qname,"| samtools sort /dev/stdin -o",final_bam])
-        cmds.append(["rm -f",bam_qname])
+        cmds.append(["samtools view  -F 1796 -u",bam_qname,"| samtools sort /dev/stdin -o",final_bam])
+        cmds.append(["rm -f ",bam_qname])
         cmds.append(["samtools index",final_bam])
-    else:
-        cmds.append(["samtools sort -n ",bam,"-o ",bam_qname])
+    elif bam_info['assay'] == 'dnase':
+        cmds.append(["samtools sort -n",bam,"-o",bam_qname])
         cmds.append(["samtools fixmate -r",bam_qname,bam_fixmate])
         cmds.append(["rm -f",bam_qname])
-        cmds.append(["samtools view -f 2 -u",bam_fixmate,
-                     "| samtools sort /dev/stdin -o",final_bam])
         cmds.append(["samtools view -F 1804 -f 2 -u",bam_fixmate,
                      "| samtools sort /dev/stdin -o",final_bam])
         cmds.append(["rm -f",bam_fixmate])
         cmds.append(["samtools index",final_bam])
+        cmds.append(["samtools flagstat",final_bam,">",bamstats])
+    else:
+        #technically, should shift bam reads but I'm having a mental breakdown because I had the commands flipped and
+        #I don't want to re-run everything
+        #cmds.append(["samtools view -f 13 -u",bam," | awk '{$4+=4;print $0}' | samtools sort /dev/stdin -n -o",bam_plusstrand])
+        #cmds.append(["samtools view -f 33 -u",bam," | awk '{$4-=5;print $0}' | samtools sort /dev/stdin -n -o",bam_minusstrand])
+        #cmds.append(["samtools merge ",bam_qname,bam_plusstrand,bam_minusstrand])
+        #cmds.append(["rm -f",bam_plusstrand])
+        #cmds.append(["rm -f",bam_minusstrand])
+        cmds.append(["samtools sort -n ",bam,"-o ",bam_qname])
+        cmds.append(["samtools fixmate -r",bam_qname,bam_fixmate])
+        cmds.append(["rm -f",bam_qname])
+        cmds.append(["samtools view -F 1804 -f 2 -u",bam_fixmate,
+                     "| samtools sort /dev/stdin -o",final_bam])
+        cmds.append(["rm -f",bam_fixmate])
+        cmds.append(["samtools index",final_bam])
+        cmds.append(["samtools flagstat",final_bam,">",bamstats])
     return cmds
-    
-def bam2tag(bam_info):
-    cmds = []
-    bam=bam_info['experiment']+'/bams/'+bam_info['samplename']+'-filtered.bam'
-    tag = bam_info['experiment']+'/bams/'+bam_info['samplename']+'.tagAlign.gz'
-    shifted_tag = bam_info['experiment']+'/bams/'+bam_info['samplename']+'.tn5.tagAlign.gz'
-    outtmp = bam_info['experiment']+'/bams/'+bam_info['samplename']+'.srt.tmp.bam'
-
-    cmds.append(["samtools sort -n ",bam," -o",outtmp])
-    #Filt Bam -> Bedpe
-    if bam_info['readtype'] == 'pe':
-        #pair end
-        cmds.append(["bedtools bamtobed -bedpe -mate1 -i", outtmp,"| awk 'BEGIN{OFS=\"\\t\"}{printf \"%s\\t%s\\t%s\\tN\\t1000\\t%s\\n%s\\t%s\\t%s\\tN\\t1000\\t%s\\n\",$1,$2,$3,$9,$4,$5,$6,$10}' | gzip -nc >",tag])
-    else: 
-        #single end
-        cmds.append(["bedtools bamtobed -i", bam,"| awk 'BEGIN{OFS=\"\\t\"}{$4=\"N\";$5=\"1000\";print $0}' | gzip -nc >",tag])
-    #Tn5 shift if atac-seq
-    if bam_info['assay'] == 'atac':
-        cmds.append(["zcat ",tag," | awk 'BEGIN {OFS = FS = \"\t\"}{ if ($6 == \"+\") {$2 = $2 + 4} else if ($6 == \"-\") {$3 = $3 - 5} print $0}' | gzip -nc > ",shifted_tag])
-    cmds.append(['rm ',outtmp])
-    
-    return cmds
-
 
 def tag2region(bam_info,args):
+    cmds=[]
     NPEAKS=300000
-    if bam_info['assay'] == 'atac':
-        tag = bam_info['experiment']+'/bams/'+bam_info['samplename']+'.tn5.tagAlign.gz'
-    else:
-        tag = bam_info['experiment']+'/bams/'+bam_info['samplename']+'.tagAlign.gz'
+
+    bam=bam_info['experiment']+'/bams/'+bam_info['samplename']+'-filtered.bam'
+
     prefix = bam_info['experiment']+'/regions/'+bam_info['samplename']+'-threshold'+str(args.pval)
     #Macs2 peaks
     if bam_info['assay'] == 'atac':
@@ -80,9 +75,15 @@ def tag2region(bam_info,args):
         genome='mm'
     else:
         genome='hs'
-    cmds.append(["macs2 callpeak -t",tag,"-f BED","-n",prefix,"-g",genome,
+    if bam_info['readtype'] == 'se':
+        cmds.append(["macs2 callpeak -t",bam,"-f BAM","-n",prefix,"-g",genome,
                  "-p",str(args.pval),"--shift",str(shiftsize),'--extsize',str(smooth_window),'--nomodel',
-                 '--SPMR','--keep-dup all','--call-summits'])
+                 '--keep-dup all','--call-summits'])
+    elif bam_info['readtype'] == 'pe':
+        cmds.append(["macs2 callpeak -t",bam,"-f BAMPE","-n",prefix,"-g",genome,
+                 "-p",str(args.pval),"--shift",str(shiftsize),'--extsize',str(smooth_window),'--nomodel',
+                 '--keep-dup all','--call-summits'])
+    
     cmds.append(["sort -k 8gr,8gr",prefix+"_peaks.narrowPeak | awk 'BEGIN{OFS=\"\\t\"}{$4=\"Peak_\"NR ; print $0}' | gzip -nc >",prefix+".narrowPeak.gz"])
     cmds.append(["rm -f",prefix+"_peaks.narrowPeak"])
     cmds.append(["rm -f",prefix+"_peaks.xls"])
@@ -130,7 +131,7 @@ def pool_bam(expt,bams_info):
     
     cmd = ['samtools merge '+expt+'/bams/'+expt+'_pooled_reps-filtered.bam']
     for bam in bams_info:
-        cmd.append(expt+'/bams/'+bam['experiment']+'-filtered.bam')
+        cmd.append(expt+'/bams/'+bam['samplename']+'-filtered.bam')
     return cmd,{'experiment':expt,
                 'samplename':expt+'_pooled_reps',
                 'assay':bam['assay'],
@@ -143,30 +144,31 @@ if __name__ == "__main__":
     parser.add_argument('experiment_template')
     parser.add_argument('-t','--nthreads',type=int,default=2)
     parser.add_argument('-p','--pval',default=0.01,type=float)
-    parser.add_argument('-mapq','--mapq',default=255,type=int)
+    #parser.add_argument('-mapq','--mapq',default=255,type=int)
     opts = parser.parse_args()
     
     expt_data = process_csv(opts)
-    
+
     #pool bams, call on pooled
     for expt in expt_data.keys():
         cmds = []
         ensure_dir(expt)
         ensure_dir(expt+'/bams')
+        ensure_dir(expt+'/stats')
         ensure_dir(expt+'/regions')
         for bam_info in expt_data[expt]:
             cmds.extend(process_bam(bam_info,opts))
+
         pool_cmd,pool_data = pool_bam(expt,expt_data[expt])
         cmds.append(pool_cmd)
         expt_data[expt].append(pool_data)
         for bam_info in expt_data[expt]:
-            cmds.extend(bam2tag(bam_info))
             cmds.extend(tag2region(bam_info,opts))
+
             
         with open(expt+'/call_accessible.sh','w') as f:
             for cmd in cmds:
                 f.write(' '.join(cmd)+'\n')
-                
         subprocess.run(["qsub -m e -M jhammelm@mit.edu -pe slots.pe "+str(opts.nthreads)+" -v PATH=$PATH -wd $PWD -N call_accessible-"+expt+" ./"+expt+"/call_accessible.sh"],shell=True)
         
 #run IDR on replicates? Not really necessary since we

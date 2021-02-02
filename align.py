@@ -36,6 +36,7 @@ parser.add_argument('aligner',choices=['STAR','bwa','bowtie2'])
 parser.add_argument('-t','--nthreads',default=4,type=int)
 parser.add_argument('-trim_adaptors','--trim_adaptors',
                     action='store_true',default=False)
+parser.add_argument('-multimap','--keepmultimappers',action='store_true',default=False)
 parser.add_argument('-rmdup','--rmdup',
                     action='store_true',default=False)
 parser.add_argument('-quality','--quality',type=int,
@@ -57,11 +58,16 @@ rsempath="/cluster/software/RSEM/RSEM-1.3.0/rsem-calculate-expression"
 cufflinkspath="/archive/gl/shared/software/cufflinks-2.2.1.Linux_x86_64/cufflinks"
 fqcpath="/data/cgs/jhammelm/software/FastQC/fastqc"
 genomepaths = {"mm10":{"STAR":"/data/cgs/jhammelm/genomes/mm10/ref/",
-                       "bowtie2":"/data/cgs/jhammelm/genomes/mm10/ref/mm10-bowtie2",
+                       #"bowtie2":"/data/cgs/jhammelm/genomes/mm10/ref/mm10-bowtie2",
+                       "bowtie2":"/archive/gl/shared/genomes/mm10/mm10",
                        "bwa":"/data/cgs/jhammelm/genomes/mm10/ref/mm10.fa"},
-               "hg38":{"bwa":"/cluster/genomes/GRCh37/Homo_sapiens/Ensembl/GRCh37/Sequence/BWAIndex/genome",
+               "hg38":{"bwa":"/archive/gl/shared/user/jhammelm/old_cluster/jhammelm/genomes/atac_human/hg38/GRCh38_no_alt_analysis_set_GCA_000001405.15.fasta",
+                       "bowtie2":"/archive/gl/shared/user/jhammelm/old_cluster/jhammelm/genomes/atac_human/hg38/bowtie2_index/GRCh38_no_alt_analysis_set_GCA_000001405.15.fasta"},
+            "hg19":{"bwa":"/cluster/genomes/GRCh37/Homo_sapiens/Ensembl/GRCh37/Sequence/BWAIndex/genome.fa",
                        "bowtie2":"/cluster/genomes/GRCh37/Homo_sapiens/Ensembl/GRCh37/Sequence/Bowtie2Index/genome"}}
-rsemref = {"mm10":"/archive/gl/shared/projects/wichterleMN/shared_data/genomes/gencode-vm24-mm10/ref/mm10-STAR","mm10-ERCC":"/archive/gl/shared/projects/wichterleMN/shared_data/genomes/gencode-vm24-mm10-ERCC/ref/mm10-STAR-ERCC"}
+rsemref = {"mm10":"/archive/gl/shared/projects/wichterleMN/shared_data/genomes/gencode-vm24-mm10/ref/mm10-STAR",
+           "mm10-ERCC":"/archive/gl/shared/projects/wichterleMN/shared_data/genomes/gencode-vm24-mm10-ERCC/ref/mm10-STAR-ERCC",
+           "mm10-TE":"/archive/gl/shared/projects/wichterleMN/transposable_elements/reference/mm10-STAR"}
 cufflinksref = {"mm10":"/archive/gl/shared/projects/wichterleMN/shared_data/mm10_ncbi_refseq-2.gtf"}
 for line in open(opts.experiment_template):
     if hasheader:
@@ -133,10 +139,14 @@ for line in open(opts.experiment_template):
             elif opts.aligner == 'bwa':
                 alignment.append(bwapath + 'bwa mem')
                 alignment.append('-t '+str(opts.nthreads))
+                if opts.keepmultimappers:
+                    alignment.append('-a')
                 alignment.append(genomepaths[genome_build][opts.aligner])
                 alignment.extend(fqfiles)
             elif opts.aligner == 'bowtie2':
                 alignment.append(bowtie2path+'bowtie2')
+                if opts.keepmultimappers:
+                    alignment.append('-k')
                 alignment.append('-p '+str(opts.nthreads))
                 alignment.append('-x '+genomepaths[genome_build][opts.aligner])
                 if len(fqfiles) == 2:
@@ -153,6 +163,7 @@ for line in open(opts.experiment_template):
             f.write('samtools sort  '+exptfolder+'/'+description+'-fixmate.bam  > '+exptfolder+'/'+description+'-sorted.bam\n')
             f.write('samtools markdup -r '+exptfolder+'/'+description+'-sorted.bam '+exptfolder+'/'+description+'-rmdup.bam\n')
             f.write('samtools sort '+exptfolder+'/'+description+'-rmdup.bam > '+exptfolder+'/'+description+'-final.bam\n')
+                
             f.write('rm '+exptfolder+'/'+description+'-rmdup.bam\n')
             f.write('rm '+exptfolder+'/'+description+'-namesort.bam\n')
             f.write('rm '+exptfolder+'/'+description+'-sorted.bam\n')
