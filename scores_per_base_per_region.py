@@ -8,6 +8,7 @@ parser.add_argument('bed')
 parser.add_argument('bigwig')
 parser.add_argument('outprefix')
 parser.add_argument('-sort','--sort',action='store_true',default=False)
+parser.add_argument('-bin','--binsize',default=1,type=int)
 parser.add_argument('-trim','--trim_to',default=0,type=int)
 opts = parser.parse_args()
 
@@ -24,7 +25,10 @@ for line in open(opts.bed):
         start = int(cols[1])
         end = int(cols[2])
     vals = np.array(bw.values(cols[0],start,end))
-    all_regions.append(vals)
+    if opts.binsize != 1:
+        all_regions.append(np.mean(vals.reshape((-1,opts.binsize)),axis=1))
+    else:
+        all_regions.append(vals)
     all_beds.append('\t'.join([cols[0],str(start),str(end)]))
 all_regions = np.array(all_regions)
 if opts.sort:
