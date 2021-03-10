@@ -66,6 +66,7 @@ genomepaths = {"mm10":{"STAR":"/data/cgs/jhammelm/genomes/mm10/ref/",
             "hg19":{"bwa":"/cluster/genomes/GRCh37/Homo_sapiens/Ensembl/GRCh37/Sequence/BWAIndex/genome.fa",
                        "bowtie2":"/cluster/genomes/GRCh37/Homo_sapiens/Ensembl/GRCh37/Sequence/Bowtie2Index/genome"}}
 rsemref = {"mm10":"/archive/gl/shared/projects/wichterleMN/shared_data/genomes/gencode-vm24-mm10/ref/mm10-STAR",
+           "hg38":"/archive/gl/shared/projects/wichterleMN/shared_data/genomes/gencode-v36-grch38/ref/hg38-STAR",
            "mm10-ERCC":"/archive/gl/shared/projects/wichterleMN/shared_data/genomes/gencode-vm24-mm10-ERCC/ref/mm10-STAR-ERCC",
            "mm10-TE":"/archive/gl/shared/projects/wichterleMN/transposable_elements/reference/mm10-STAR"}
 cufflinksref = {"mm10":"/archive/gl/shared/projects/wichterleMN/shared_data/mm10_ncbi_refseq-2.gtf"}

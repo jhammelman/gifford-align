@@ -41,8 +41,7 @@ def process_bam(bam_info,args):
         cmds.append(["samtools index",final_bam])
         cmds.append(["samtools flagstat",final_bam,">",bamstats])
     else:
-        #technically, should shift bam reads but I'm having a mental breakdown because I had the commands flipped and
-        #I don't want to re-run everything
+        #technically, should shift bam reads for ATAC-seq - option to uncomment in future
         #cmds.append(["samtools view -f 13 -u",bam," | awk '{$4+=4;print $0}' | samtools sort /dev/stdin -n -o",bam_plusstrand])
         #cmds.append(["samtools view -f 33 -u",bam," | awk '{$4-=5;print $0}' | samtools sort /dev/stdin -n -o",bam_minusstrand])
         #cmds.append(["samtools merge ",bam_qname,bam_plusstrand,bam_minusstrand])
