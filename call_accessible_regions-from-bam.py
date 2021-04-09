@@ -143,6 +143,7 @@ if __name__ == "__main__":
     parser.add_argument('experiment_template')
     parser.add_argument('-t','--nthreads',type=int,default=2)
     parser.add_argument('-p','--pval',default=0.01,type=float)
+    parser.add_argument('-nop','--nopeaks',default=False,action='store_true')
     #parser.add_argument('-mapq','--mapq',default=255,type=int)
     opts = parser.parse_args()
     
@@ -161,9 +162,9 @@ if __name__ == "__main__":
         pool_cmd,pool_data = pool_bam(expt,expt_data[expt])
         cmds.append(pool_cmd)
         expt_data[expt].append(pool_data)
-        for bam_info in expt_data[expt]:
-            cmds.extend(tag2region(bam_info,opts))
-
+        if not opts.nopeaks:
+            for bam_info in expt_data[expt]:
+                cmds.extend(tag2region(bam_info,opts))
             
         with open(expt+'/call_accessible.sh','w') as f:
             for cmd in cmds:

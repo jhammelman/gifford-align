@@ -9,6 +9,7 @@ parser.add_argument('bigwig')
 parser.add_argument('outprefix')
 parser.add_argument('-sort','--sort',action='store_true',default=False)
 parser.add_argument('-bin','--binsize',default=1,type=int)
+parser.add_argument('-orient','--with_orientation',default=False,action='store_true')
 parser.add_argument('-trim','--trim_to',default=0,type=int)
 opts = parser.parse_args()
 
@@ -24,7 +25,14 @@ for line in open(opts.bed):
     else:
         start = int(cols[1])
         end = int(cols[2])
-    vals = np.array(bw.values(cols[0],start,end))
+    try:
+        vals = np.array(bw.values(cols[0],start,end))
+    except RuntimeError:
+        print('Error skipping region '+line.strip()+' because out of bounds')
+        continue 
+    if opts.with_orientation:
+        if cols[3] == '-':
+            vals = vals[::-1]
     if opts.binsize != 1:
         all_regions.append(np.mean(vals.reshape((-1,opts.binsize)),axis=1))
     else:

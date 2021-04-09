@@ -55,6 +55,7 @@ STARpath="/cluster/software/STAR-2.5.2b/bin/Linux_x86_64/"
 bwapath="/cluster/jhammelm/tools/bwa-0.7.17/"
 bowtie2path="/cluster/software/bowtie2-2.2.9/"
 rsempath="/cluster/software/RSEM/RSEM-1.3.0/rsem-calculate-expression"
+rsemanalyze="/cluster/software/RSEM/RSEM-1.3.0/rsem-plot-model"
 cufflinkspath="/archive/gl/shared/software/cufflinks-2.2.1.Linux_x86_64/cufflinks"
 fqcpath="/data/cgs/jhammelm/software/FastQC/fastqc"
 genomepaths = {"mm10":{"STAR":"/data/cgs/jhammelm/genomes/mm10/ref/",
@@ -173,7 +174,14 @@ for line in open(opts.experiment_template):
             rsem = [rsempath]
             if len(fqfiles) > 1:
                 rsem.append('--paired-end')
+            if strand == 'forward':
+                rsem.extend(['--strandedness','forward'])
+            elif strand == 'reverse':
+                rsem.extend(['--strandedness','reverse'])
+            else:
+                rsem.extend(['--strandedness','none'])
             rsem.append('--output-genome-bam')
+            rsem.append('--estimate-rspd')
             rsem.extend(['-p',str(opts.nthreads)])
             rsem.extend(fqfiles)
             if opts.aligner == "STAR":
@@ -186,6 +194,8 @@ for line in open(opts.experiment_template):
             rsem.append(exptfolder+'/'+description+'-rsem')
             rsem.append('--append-names')
             f.write(' '.join(rsem)+'\n')
+            analyze = [rsemanalyze,exptfolder+'/'+description+'-rsem',exptfolder+'/'+description+'-rsem_diagnostic.pdf']
+            f.write(' '.join(analyze)+'\n')
         if opts.cufflinks:
             cl = [cufflinkspath]
             cl.extend(['-g',cufflinksref[genome_build],'--GTF',
@@ -208,9 +218,9 @@ for line in open(opts.experiment_template):
             f.write(' '.join(counts)+'\n')
         f.write('mv '+fastqpath+'*trimming_report.txt '+exptfolder+'/trimgalore\n')
         f.write('rm '+fastqpath+'*_val*\n')
-
+        
     if opts.local:
-        subprocess.run(['./'+exptfolder+'/run_align.sh'],shell=True)
+        subprocess.run(['sh '+exptfolder+'/run_align.sh'],shell=True)
     else:
         subprocess.run(["qsub -m e -M jhammelm@mit.edu -pe slots.pe "+str(opts.nthreads)+" -v PATH=$PATH -wd $PWD -N align_"+description+'_'+opts.aligner+' ./'+exptfolder+'/run_align.sh'],shell=True)
     
